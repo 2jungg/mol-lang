@@ -21,16 +21,39 @@ class ReturnValue(Exception):
     def __init__(self, value):
         self.value = value
 
-# --- Tokenizer ---
+# --- Manual Tokenizer V2 ---
 def tokenize(code):
     code = code.replace('[', ' [ ').replace(']', ' ] ')
-    # Regex to handle quoted strings (single, double, backtick),
-    # negative numbers, and other non-whitespace tokens.
-    token_regex = r'"[^"]*"|\'[^\']*\'|`[^`]*`|[^\s"`\']+'
     tokens = []
-    for line in code.split('\n'):
-        tokens.extend(re.findall(token_regex, line))
-    return [token for token in tokens if token] # Filter out empty tokens
+    i = 0
+    while i < len(code):
+        char = code[i]
+        if char.isspace():
+            i += 1
+            continue
+        
+        if char in ['"', "'", '`']:
+            quote_char = char
+            string_token = char
+            i += 1
+            while i < len(code) and code[i] != quote_char:
+                string_token += code[i]
+                i += 1
+            if i < len(code): # Add the closing quote
+                string_token += code[i]
+                i += 1
+            tokens.append(string_token)
+            continue
+
+        # For other tokens
+        other_token = char
+        i += 1
+        while i < len(code) and not code[i].isspace() and code[i] not in ['"', "'", '`', '[', ']']:
+            other_token += code[i]
+            i += 1
+        tokens.append(other_token)
+
+    return tokens
 
 # --- Parser (creates AST) ---
 class Parser:
