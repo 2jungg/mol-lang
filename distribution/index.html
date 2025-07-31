@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mol-Lang Online</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"></script>
+</head>
+<body>
+    <h1>Mol-Lang Online Interpreter</h1>
+    <div class="container">
+        <div class="editor-container">
+            <h2>Code</h2>
+            <textarea id="code-input" rows="20" cols="80"></textarea>
+            <button id="run-button">Run</button>
+        </div>
+        <div class="output-container">
+            <h2>Output</h2>
+            <pre id="output"></pre>
+        </div>
+        <div class="input-container">
+            <h2>Input (for '뭐먹')</h2>
+            <textarea id="input-data" rows="5" cols="80"></textarea>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
