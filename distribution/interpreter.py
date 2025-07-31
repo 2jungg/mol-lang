@@ -187,12 +187,18 @@ class Interpreter:
 
     def visit_input(self, node):
         if self.input_idx < len(self.input_lines):
-            value = self.input_lines[self.input_idx]
+            value_str = self.input_lines[self.input_idx]
             self.input_idx += 1
             try:
-                return int(value)
+                # Try to convert to an integer first
+                return int(value_str)
             except ValueError:
-                return value
+                try:
+                    # If it fails, try to convert to a float
+                    return float(value_str)
+                except ValueError:
+                    # If both fail, return it as a string
+                    return value_str
         return "" # Return empty string if no more input
 
     def visit_assign(self, node):
@@ -209,11 +215,26 @@ class Interpreter:
         op, left_node, right_node = node[1], node[2], node[3]
         left = self.visit(left_node)
         right = self.visit(right_node)
-        if op == '+': return left + right
-        if op == '*': return left * right
+        
+        if op == '+':
+            if isinstance(left, str) or isinstance(right, str):
+                return str(left) + str(right)
+            return left + right
+        
+        if op == '*':
+            if (isinstance(left, str) and isinstance(right, int)):
+                return left * right
+            if (isinstance(left, int) and isinstance(right, str)):
+                return right * left
+            return left * right
+
+        # For comparison operators, we can try to be flexible
+        # but for now, we'll rely on Python's default behavior which might raise errors
+        # if types are incompatible (e.g., comparing string and int with '<').
         if op == '==': return left == right
         if op == '<': return left < right
         if op == '<=': return left <= right
+        
         raise ValueError(f"Unsupported operator: {op}")
 
     def visit_if(self, node):
@@ -261,7 +282,16 @@ class Interpreter:
         
         return "\n".join(self.output_buffer)
 
-# This function will be called from JavaScript
-def run_mollang_code(code, input_data):
-    interpreter = Interpreter(input_data)
+# --- Global Interpreter Instance ---
+interpreter = Interpreter()
+
+# This function will be called from JavaScript to run code
+def run_mollang_code(code, input_data=""):
+    global interpreter
+    interpreter = Interpreter(input_data) # Reset interpreter for new run
     return interpreter.run(code)
+
+# This function will be called from JavaScript to provide input
+def add_input(text):
+    global interpreter
+    interpreter.input_lines.extend(text.splitlines())
